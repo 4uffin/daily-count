@@ -1,0 +1,53 @@
+name: Daily Log Creator
+
+# This defines when the action will run
+on:
+  # Run automatically every day at 00:00 UTC (Midnight UTC)
+  schedule:
+    - cron: '0 0 * * *' 
+  # Allows manual triggering from the GitHub Actions tab
+  workflow_dispatch:
+
+# Set permissions required for the action to write/push files
+permissions:
+  contents: write 
+
+jobs:
+  create_daily_log:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Download the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      # Step 2: Set up the Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' 
+
+      # Step 3: Run the Python script
+      - name: Run Daily Counter Script
+        id: counter_script # Assign an ID to check the outcome
+        run: |
+          python daily_counter.py
+          
+      # Step 4: Commit and push changes if the script successfully created a new file
+      # The 'if' condition checks if the script finished with exit code 0 (success)
+      - name: Commit and Push New Log File
+        if: ${{ steps.counter_script.outcome == 'success' }}
+        run: |
+          # 1. Configure Git user details
+          git config --global user.name 'Automated Daily Log [bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 2. Add the newly created log file(s)
+          git add daily_logs/*.txt
+          
+          # 3. Create a commit 
+          DATE=$(date +'%Y-%m-%d')
+          git commit -m "Automated: Daily log created for $DATE"
+          
+          # 4. Push the changes back to the repository
+          git push
