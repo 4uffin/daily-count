@@ -3,35 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Entry Log</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
+    <title>Latest Daily Log</title>
 </head>
 <body>
-    <h1>Most Recent Daily Entry Log</h1>
-    <div id="log-content">
-        <!-- Daily entry log will be displayed here -->
-    </div>
+    <h1>Most Recent Daily Log</h1>
+    <div id="log-content"></div>
+
     <script>
-        fetch('daily_logs/recent_entry.txt')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('log-content').innerText = data;
-            })
-            .catch(error => {
-                document.getElementById('log-content').innerText = 'Error loading the log.';
-            });
+        async function fetchLatestLog() {
+            try {
+                const response = await fetch('https://api.example.com/daily_logs'); // Update with real API endpoint
+                const logs = await response.json();
+                const latestLog = logs[logs.length - 1]; // Assuming logs are sorted by date
+
+                document.getElementById('log-content').innerHTML = `<h2>Day: ${latestLog.day_number}</h2>\n` +
+                    `<p>Date: ${latestLog.date}</p>\n` +
+                    `<p>Status: ${latestLog.status}</p>`;
+            } catch (error) {
+                console.error('Error fetching the latest log:', error);
+                document.getElementById('log-content').innerHTML = '<p>Error loading log data.</p>';
+            }
+        }
+
+        fetchLatestLog();
     </script>
 </body>
 </html>
